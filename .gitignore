@@ -1,0 +1,39 @@
+# ignore binaries
+binaries/libfmipp_fmu_frontend.lib
+binaries/libboost_date_time-vc100-mt-1_58.lib
+binaries/libboost_filesystem-vc100-mt-1_58.lib
+binaries/libboost_system-vc100-mt-1_58.lib
+binaries/Type6139Lib.*
+
+# ignore FMUs for testing
+*.fmu
+
+# ignore pickle file from installation process
+trnsys_fmu_install.pkl
+
+# ignore pyc files
+*.pyc
+
+# ignore output from compiling the documentation
+doc/trnsys-fmu-doc.aux
+doc/trnsys-fmu-doc.bbl
+doc/trnsys-fmu-doc.blg
+doc/trnsys-fmu-doc.log
+doc/trnsys-fmu-doc.out
+doc/trnsys-fmu-doc.pdf
+doc/trnsys-fmu-doc.ptc
+doc/trnsys-fmu-doc.synctex.gz
+doc/trnsys-fmu-doc.toc
+
+# ignore extra files from running CMake
+release/ALL_BUILD.*
+release/CMakeCache.txt
+release/CMakeFiles
+release/FMIPP_TRNSYS_FMU_EXPORT.*
+release/Release
+release/Type6139Lib.*
+release/Win32
+release/ZERO_CHECK.*
+release/cmake_install.cmake
+release/libfmipp_fmu_frontend.*
+
