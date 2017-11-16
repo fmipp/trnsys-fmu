@@ -1,5 +1,19 @@
 \chapter{Troubleshooting}
 
-In case the created FMU does not work as expected, the best way to check what happened is to take a look into the log file created by \trnsys.
-This file is written in the unzipped folder of the FMU, called \texttt{<deck-file>.log}, where \texttt{<deck-file>} corresponds to the deck file name included in the FMU.
-Please note, the location of this unzipped folder depends on the co-simulation environment used to access the FMU.
+\begin{itemize}
+
+  \item \textbf{Error message: \textit{[Error] Not able to create shared library}}\\
+  In case this error message appears when attempting to generate an FMU there is a problem with the compiler.
+  For instance, Microsoft Visual Studio may not be installed or the wrong version may be installed.
+  For more information please check the file \texttt{build.log}, which is generated in the directory from which the Python script \texttt{trnsys\_fmu\_create.py} has been executed.
+  
+  \item \textbf{During simulation the FMU does not work as expected.}\\
+  In case the created FMU does not work as expected, the best way to check what happened is to take a look into the log file created by \trnsys.
+  This file is written in the unzipped folder of the FMU, called \texttt{<deck-file>.log}, where \texttt{<deck-file>} corresponds to the deck file name included in the FMU.
+  Please note, the location of this unzipped folder depends on the co-simulation environment used to access the FMU.
+
+\end{itemize}
+
+
+
+

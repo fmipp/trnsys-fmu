@@ -1,5 +1,5 @@
 # --------------------------------------------------------------
-# Copyright (c) 2015, AIT Austrian Institute of Technology GmbH.
+# Copyright (c) 2015-2017, AIT Austrian Institute of Technology GmbH.
 # All rights reserved. See file TRNSYS_FMU_LICENSE for details.
 # --------------------------------------------------------------
 
@@ -14,8 +14,8 @@ cmake_minimum_required(VERSION 2.8)
 
 
 # Variables to be defined by the user.
-set( User_FMIPP_SOURCE_DIR "D:/Development/fmipp" CACHE PATH "FMI++ source directory" )
-set( User_TRNSYS17_PATH "D:/Trnsys17" CACHE FILEPATH "TRNSYS 17 root directory" )
+set( User_TRNSYS17_PATH "C:/Trnsys17" CACHE FILEPATH "TRNSYS 17 root directory" )
+
 
 # Define project.
 project( FMIPP_TRNSYS_FMU_EXPORT )
@@ -94,33 +94,32 @@ endif ()
 
 # FMI back end component (TRNSYS type Type6139).
 add_library( Type6139Lib SHARED
-             ${User_FMIPP_SOURCE_DIR}/export/tools/trnsys17/Type6139/Type6139.cpp
-             ${User_FMIPP_SOURCE_DIR}/export/src/FMIComponentBackEnd.cpp
-             ${User_FMIPP_SOURCE_DIR}/export/src/IPCLogger.cpp
-             ${User_FMIPP_SOURCE_DIR}/export/src/IPCSlaveLogger.cpp
-             ${User_FMIPP_SOURCE_DIR}/export/src/SHMSlave.cpp
-             ${User_FMIPP_SOURCE_DIR}/export/src/SHMManager.cpp
-             ${User_FMIPP_SOURCE_DIR}/export/src/HelperFunctions.cpp
-             ${User_FMIPP_SOURCE_DIR}/export/src/ScalarVariable.cpp )
+             ${PROJECT_SOURCE_DIR}/../sources/type6139/Type6139.cpp
+             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/FMIComponentBackEnd.cpp
+             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/IPCLogger.cpp
+             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/IPCSlaveLogger.cpp
+             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/SHMSlave.cpp
+             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/SHMManager.cpp
+             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/HelperFunctions.cpp
+             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/ScalarVariable.cpp )
 
 # FMI front end component library (for FMU DLL).
 add_library( libfmipp_fmu_frontend STATIC
-             ${User_FMIPP_SOURCE_DIR}/export/src/FMIComponentFrontEndBase.cpp
-             ${User_FMIPP_SOURCE_DIR}/export/src/FMIComponentFrontEnd.cpp
-             ${User_FMIPP_SOURCE_DIR}/export/src/IPCLogger.cpp
-             ${User_FMIPP_SOURCE_DIR}/export/src/IPCMasterLogger.cpp
-             ${User_FMIPP_SOURCE_DIR}/export/src/SHMMaster.cpp
-             ${User_FMIPP_SOURCE_DIR}/export/src/SHMManager.cpp
-             ${User_FMIPP_SOURCE_DIR}/export/src/HelperFunctions.cpp
-             ${User_FMIPP_SOURCE_DIR}/export/src/ScalarVariable.cpp
-             ${User_FMIPP_SOURCE_DIR}/import/base/src/ModelDescription.cpp
-             ${User_FMIPP_SOURCE_DIR}/import/base/src/PathFromUrl.cpp )
+             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/FMIComponentFrontEndBase.cpp
+             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/FMIComponentFrontEnd.cpp
+             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/IPCLogger.cpp
+             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/IPCMasterLogger.cpp
+             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/SHMMaster.cpp
+             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/SHMManager.cpp
+             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/HelperFunctions.cpp
+             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/ScalarVariable.cpp
+             ${PROJECT_SOURCE_DIR}/../sources/fmipp/import/base/src/ModelDescription.cpp
+             ${PROJECT_SOURCE_DIR}/../sources/fmipp/import/base/src/PathFromUrl.cpp )
 
 
 # Include directories.
-include_directories( ${User_FMIPP_SOURCE_DIR}/export/tools/trnsys17/Type6139 )
-include_directories( ${User_FMIPP_SOURCE_DIR} )
-include_directories( ${User_FMIPP_SOURCE_DIR}/export/include )
+include_directories( ${PROJECT_SOURCE_DIR}/../sources/type6139 )
+include_directories( ${PROJECT_SOURCE_DIR}/../sources/fmipp )
 
 # Link libraries.
 target_link_libraries( Type6139Lib
