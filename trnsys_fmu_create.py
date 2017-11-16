@@ -36,13 +36,13 @@ def generateTrnsysFMU(
         """
         
         # Template string for XML model description header.
-        model_description_header = '<?xml version="1.0" encoding="UTF-8"?>\n<fmiModelDescription fmiVersion="1.0" modelName="__MODEL_NAME__" modelIdentifier="__MODEL_IDENTIFIER__" description="TRNSYS FMI CS export" generationTool="FMI++ TRNSYS Export Utility" generationDateAndTime="__DATE_AND_TIME__" variableNamingConvention="flat" numberOfContinuousStates="0" numberOfEventIndicators="0" author="__USER__" guid="{__GUID__}">\n\t<ModelVariables>\n'
+        model_description_header = '<?xml version="1.0" encoding="UTF-8"?>\n<fmiModelDescription fmiVersion="1.0" modelName="__MODEL_NAME__" modelIdentifier="__MODEL_IDENTIFIER__" description="TRNSYS FMI CS export" generationTool="FMI++ TRNSYS Export Utility" generationDateAndTime="__DATE_AND_TIME__" variableNamingConvention="flat" numberOfContinuousStates="0" numberOfEventIndicators="0" author="__USER__" guid="{__GUID__}">\n\t<VendorAnnotations>\n\t\t<Tool name="trnexe">\n\t\t\t<Executable preArguments="" postArguments="/n" executableURI="__TRNEXE_URI__"/>\n\t\t</Tool>\n\t</VendorAnnotations>\n\t<ModelVariables>\n'
 
         # Template string for XML model description of scalar variables.
         scalar_variable_node = '\t\t<ScalarVariable name="__VAR_NAME__" valueReference="__VAL_REF__" variability="continuous" causality="__CAUSALITY__">\n\t\t\t<Real__START_VALUE__/>\n\t\t</ScalarVariable>\n'
 
         # Template string for XML model description footer.
-        model_description_footer = '\t</ModelVariables>\n\t<Implementation>\n\t\t<CoSimulation_Tool>\n\t\t\t<Capabilities canHandleVariableCommunicationStepSize="false" canHandleEvents="true" canRejectSteps="false" canInterpolateInputs="false" maxOutputDerivativeOrder="0" canRunAsynchronuously="false" canSignalEvents="false" canBeInstantiatedOnlyOncePerProcess="false" canNotUseMemoryManagementFunctions="true"/>\n\t\t\t<Model entryPoint="fmu://__DECK_FILE_NAME__" manualStart="false" type="application/x-trnexe">__ADDITIONAL_FILES__</Model>\n\t\t</CoSimulation_Tool>\n\t</Implementation>\n\t<VendorAnnotations>\n\t\t<trnexe preArguments="" postArguments="" executableURI="__TRNEXE_URI__"/>\n\t</VendorAnnotations>\n</fmiModelDescription>'
+        model_description_footer = '\t</ModelVariables>\n\t<Implementation>\n\t\t<CoSimulation_Tool>\n\t\t\t<Capabilities canHandleVariableCommunicationStepSize="false" canHandleEvents="true" canRejectSteps="false" canInterpolateInputs="false" maxOutputDerivativeOrder="0" canRunAsynchronuously="false" canBeInstantiatedOnlyOncePerProcess="false" canNotUseMemoryManagementFunctions="true"/>\n\t\t\t<Model entryPoint="fmu://__DECK_FILE_NAME__" manualStart="false" type="application/x-trnexe">__ADDITIONAL_FILES__</Model>\n\t\t</CoSimulation_Tool>\n\t</Implementation>\n</fmiModelDescription>'
 
         # Create new XML model description file.
         model_description_name = 'modelDescription.xml'
@@ -67,6 +67,10 @@ def generateTrnsysFMU(
 
         # GUID.
         model_description_header = model_description_header.replace( '__GUID__', str( uuid.uuid1() ) )
+
+        # URI of TRNSYS main executable (TRNExe.exe).
+        trnsys_exe_uri = urlparse.urljoin( 'file:', urllib.pathname2url( trnsys_install_dir ) ) + '/exe/trnexe.exe'
+        model_description_header = model_description_header.replace( '__TRNEXE_URI__', trnsys_exe_uri )
 
         # Write header to file.
         model_description.write( model_description_header );
@@ -110,10 +114,6 @@ def generateTrnsysFMU(
         #
         # Replace template arguments in footer.
         #
-
-        # URI of TRNSYS main executable (TRNExe.exe).
-        trnsys_exe_uri = urlparse.urljoin( 'file:', urllib.pathname2url( trnsys_install_dir ) ) + '/exe/trnexe.exe'
-        model_description_footer = model_description_footer.replace( '__TRNEXE_URI__', trnsys_exe_uri )
 
         # Input deck file.
         model_description_footer = model_description_footer.replace( '__DECK_FILE_NAME__', os.path.basename( deck_file_name ) )
