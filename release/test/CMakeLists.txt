@@ -14,12 +14,13 @@ cmake_minimum_required(VERSION 2.8)
 
 
 # Variables to be defined by the user.
-set( User_MODEL_IDENTIFIER "Type6139_Test" CACHE STRING "FMI model identfier" )
-set( User_TRNSYS17_PATH "C:/Trnsys17" CACHE FILEPATH "TRNSYS 17 root directory" )
+set( TRNSYS17_PATH "D:/Trnsys17" CACHE FILEPATH "TRNSYS 17 root directory" )
+set( MODEL_IDENTIFIER_FMI1 "Type6139_FMI1_Test" CACHE STRING "FMI 1.0 model identfier" )
+set( MODEL_IDENTIFIER_FMI2 "Type6139_FMI2_Test" CACHE STRING "FMI 2.0 model identfier" )
 
 
 # Define project.
-project( TRNSYS_Wrapper_${User_MODEL_IDENTIFIER} )
+project( Test_TRNSYS_Wrapper )
 
 
 # Optional builds.
@@ -62,14 +63,9 @@ else ()
 
 endif ()
 
+# Compiler flags.
 add_definitions(-DFMU_BIN_DIR="${FMU_BIN_DIR}")
 add_definitions(-DFMU_BIN_EXT="${FMU_BIN_EXT}")
-
-
-# Compiler flags.
-add_definitions( -DMODEL_IDENTIFIER=${User_MODEL_IDENTIFIER} )
-add_definitions( -DFRONT_END_TYPE=FMIComponentFrontEnd )
-add_definitions( -DFRONT_END_TYPE_INCLUDE="FMIComponentFrontEnd.h" )
 add_definitions( -DBUILD_FMI_DLL )
 add_definitions( -DBOOST_ALL_NO_LIB )
 
@@ -102,8 +98,8 @@ add_library( Type6139Lib SHARED
    )
 
    
-# FMI front end component (FMU DLL).
-add_library( ${User_MODEL_IDENTIFIER} SHARED
+# FMU DLL (FMI 1.0)
+add_library( ${MODEL_IDENTIFIER_FMI1} SHARED
    ${PROJECT_SOURCE_DIR}/../../sources/fmipp/export/functions/fmi_v1.0/fmiFunctions.cpp
    ${PROJECT_SOURCE_DIR}/../../sources/fmipp/export/src/FMIComponentFrontEndBase.cpp
    ${PROJECT_SOURCE_DIR}/../../sources/fmipp/export/src/FMIComponentFrontEnd.cpp
@@ -117,6 +113,32 @@ add_library( ${User_MODEL_IDENTIFIER} SHARED
    ${PROJECT_SOURCE_DIR}/../../sources/fmipp/import/base/src/PathFromUrl.cpp
    )
 
+target_compile_definitions( ${MODEL_IDENTIFIER_FMI1} PRIVATE
+   MODEL_IDENTIFIER=${MODEL_IDENTIFIER_FMI1}
+   FRONT_END_TYPE=FMIComponentFrontEnd
+   FRONT_END_TYPE_INCLUDE="FMIComponentFrontEnd.h"
+   )
+
+# FMU DLL (FMI 2.0)
+add_library( ${MODEL_IDENTIFIER_FMI2} SHARED
+   ${PROJECT_SOURCE_DIR}/../../sources/fmipp/export/functions/fmi_v2.0/fmi2Functions.cpp
+   ${PROJECT_SOURCE_DIR}/../../sources/fmipp/export/src/FMIComponentFrontEndBase.cpp
+   ${PROJECT_SOURCE_DIR}/../../sources/fmipp/export/src/FMIComponentFrontEnd.cpp
+   ${PROJECT_SOURCE_DIR}/../../sources/fmipp/export/src/IPCLogger.cpp
+   ${PROJECT_SOURCE_DIR}/../../sources/fmipp/export/src/IPCMasterLogger.cpp
+   ${PROJECT_SOURCE_DIR}/../../sources/fmipp/export/src/SHMMaster.cpp
+   ${PROJECT_SOURCE_DIR}/../../sources/fmipp/export/src/SHMManager.cpp
+   ${PROJECT_SOURCE_DIR}/../../sources/fmipp/export/src/HelperFunctions.cpp
+   ${PROJECT_SOURCE_DIR}/../../sources/fmipp/export/src/ScalarVariable.cpp
+   ${PROJECT_SOURCE_DIR}/../../sources/fmipp/import/base/src/ModelDescription.cpp
+   ${PROJECT_SOURCE_DIR}/../../sources/fmipp/import/base/src/PathFromUrl.cpp
+   )
+
+target_compile_definitions( ${MODEL_IDENTIFIER_FMI2} PRIVATE
+   MODEL_IDENTIFIER=${MODEL_IDENTIFIER_FMI2}
+   FRONT_END_TYPE=FMIComponentFrontEnd
+   FRONT_END_TYPE_INCLUDE="FMIComponentFrontEnd.h"
+   )
 
 # Include directories.
 include_directories( ${PROJECT_SOURCE_DIR}/../../sources/type6139 )
@@ -125,28 +147,33 @@ include_directories( ${PROJECT_SOURCE_DIR}/../../sources/fmipp/export/include )
 
 
 # Link libraries.
-target_link_libraries( ${User_MODEL_IDENTIFIER}
+target_link_libraries( ${MODEL_IDENTIFIER_FMI1}
    shlwapi
    ${CMAKE_DL_LIBS}
    ${Boost_LIBRARIES}
    )
 
+target_link_libraries( ${MODEL_IDENTIFIER_FMI2}
+   shlwapi
+   ${CMAKE_DL_LIBS}
+   ${Boost_LIBRARIES}
+   )
 
 target_link_libraries( Type6139Lib
    shlwapi
    ${Boost_LIBRARIES}
-   ${User_TRNSYS17_PATH}/Exe/TRNDll.lib
+   ${TRNSYS17_PATH}/Exe/TRNDll.lib
    )
 
 
 # Install Type6139 for TRNSYS.
 add_custom_command( TARGET Type6139Lib POST_BUILD
-   COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:Type6139Lib> "${User_TRNSYS17_PATH}/UserLib/ReleaseDLLs"
-   COMMAND ${CMAKE_COMMAND} -E make_directory "${User_TRNSYS17_PATH}/Studio/Proformas/My Components"
-   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../proformas/Type6139a.tmf "${User_TRNSYS17_PATH}/Studio/Proformas/My Components"
-   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../proformas/Type6139a.bmp "${User_TRNSYS17_PATH}/Studio/Proformas/My Components"
-   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../proformas/Type6139b.tmf "${User_TRNSYS17_PATH}/Studio/Proformas/My Components"
-   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../proformas/Type6139b.bmp "${User_TRNSYS17_PATH}/Studio/Proformas/My Components"
+   COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:Type6139Lib> "${TRNSYS17_PATH}/UserLib/ReleaseDLLs"
+   COMMAND ${CMAKE_COMMAND} -E make_directory "${TRNSYS17_PATH}/Studio/Proformas/My Components"
+   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../proformas/Type6139a.tmf "${TRNSYS17_PATH}/Studio/Proformas/My Components"
+   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../proformas/Type6139a.bmp "${TRNSYS17_PATH}/Studio/Proformas/My Components"
+   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../proformas/Type6139b.tmf "${TRNSYS17_PATH}/Studio/Proformas/My Components"
+   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../proformas/Type6139b.bmp "${TRNSYS17_PATH}/Studio/Proformas/My Components"
    )
 
 
@@ -158,30 +185,61 @@ endif ()
 find_package( Boost COMPONENTS system filesystem unit_test_framework REQUIRED )
 
 # Path to XML model description and additional files.
-set( FMU_URI "file://${PROJECT_SOURCE_DIR}" CACHE INTERNAL "" )
-add_definitions( -DFMU_URI="${FMU_URI}" )
+set( FMU_URI_FMI1 "file://${PROJECT_SOURCE_DIR}/Type6139_FMI1_Test" CACHE INTERNAL "" )
+set( FMU_RESOURCES_URI_FMI2 "file://${PROJECT_SOURCE_DIR}/Type6139_FMI2_Test/resources" CACHE INTERNAL "" )
 
-# Add and link executable.
-add_executable( testTrnsysFMU WIN32
-   ${PROJECT_SOURCE_DIR}/testTrnsysFMU.cpp
+# Add executables.
+add_executable( testTrnsysFMI1 WIN32
+   ${PROJECT_SOURCE_DIR}/testTrnsysFMI1.cpp
    ${PROJECT_SOURCE_DIR}/../../sources/fmipp/import/base/src/CallbackFunctions.cpp
    ${PROJECT_SOURCE_DIR}/../../sources/fmipp/import/base/src/LogBuffer.cpp
    )
 
-target_link_libraries( testTrnsysFMU
-   ${User_MODEL_IDENTIFIER}
+add_executable( testTrnsysFMI2 WIN32
+   ${PROJECT_SOURCE_DIR}/testTrnsysFMI2.cpp
+   ${PROJECT_SOURCE_DIR}/../../sources/fmipp/import/base/src/CallbackFunctions.cpp
+   ${PROJECT_SOURCE_DIR}/../../sources/fmipp/import/base/src/LogBuffer.cpp
+   )
+
+# Define compiler flags.
+target_compile_definitions( testTrnsysFMI1 PRIVATE
+    MODEL_IDENTIFIER=${MODEL_IDENTIFIER_FMI1}
+    FMU_URI="${FMU_URI_FMI1}"
+    )
+
+target_compile_definitions( testTrnsysFMI2 PRIVATE
+    MODEL_IDENTIFIER=${MODEL_IDENTIFIER_FMI2}
+    FMU_RESOURCES_URI="${FMU_RESOURCES_URI_FMI2}"
+    )
+
+# Link executables.
+target_link_libraries( testTrnsysFMI1
+   ${MODEL_IDENTIFIER_FMI1}
    ${Boost_FILESYSTEM_LIBRARY}
    ${Boost_SYSTEM_LIBRARY}
    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
    )
 
-# Post build action: copy executable to new subdirectory test.
-add_custom_command( TARGET testTrnsysFMU POST_BUILD
+target_link_libraries( testTrnsysFMI2
+   ${MODEL_IDENTIFIER_FMI2}
+   ${Boost_FILESYSTEM_LIBRARY}
+   ${Boost_SYSTEM_LIBRARY}
+   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+   )
+
+# Post build action: copy executables to new subdirectory test.
+add_custom_command( TARGET testTrnsysFMI1 POST_BUILD
    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/test
-   COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:testTrnsysFMU> ${CMAKE_BINARY_DIR}/test
+   COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:testTrnsysFMI1> ${CMAKE_BINARY_DIR}/test
+   )
+
+add_custom_command( TARGET testTrnsysFMI2 POST_BUILD
+   COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/test
+   COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:testTrnsysFMI2> ${CMAKE_BINARY_DIR}/test
    )
 
 # Add test.
 enable_testing()
 include( CMakeAddTests.txt )
-add_test_fmipp( testTrnsysFMU )
+add_test_fmipp( testTrnsysFMI1 )
+add_test_fmipp( testTrnsysFMI2 )

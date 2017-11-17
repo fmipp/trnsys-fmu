@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fmiModelDescription
     fmiVersion="1.0"
-    modelName="Type6139_Test"
-    modelIdentifier="Type6139_Test"
+    modelName="Type6139_FMI1_Test"
+    modelIdentifier="Type6139_FMI1_Test"
     description="FMI CS export test"
     generationTool="TRNSYS17"
     generationDateAndTime="2014-06-23T13:45:00+01:00"
@@ -10,7 +10,7 @@
     numberOfContinuousStates="0"
     numberOfEventIndicators="0"
     author="Edmund Widl"
-    guid="{TRNSYS17-TYPE-6139-TEST-000000000000}">
+    guid="{TRNSYS17-TYPE-6139-TEST-FMI100000000}">
   <VendorAnnotations>
     <Tool name="trnexe">
       <Executable
@@ -46,14 +46,13 @@
         canInterpolateInputs="false"
         maxOutputDerivativeOrder="0"
         canRunAsynchronuously="false"
-        canSignalEvents="false"
         canBeInstantiatedOnlyOncePerProcess="false"
         canNotUseMemoryManagementFunctions="true"/>
       <Model
-        entryPoint="fmu://Type6139_Test.dck"
+        entryPoint="fmu://resources/Type6139_Test.dck"
         manualStart="false"
         type="application/x-trnexe">
-        <File file="fmu://Type6139_Test.PTI"/>
+        <File file="fmu://resources/Type6139_Test.PTI"/>
       </Model>
     </CoSimulation_Tool>
   </Implementation>

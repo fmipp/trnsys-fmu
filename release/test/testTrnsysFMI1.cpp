@@ -6,7 +6,7 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE testTrnsysFMU
 
-/// \file testTrnsysFMU.cpp
+/// \file testTrnsysFMI1.cpp
 
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
@@ -35,15 +35,15 @@ BOOST_AUTO_TEST_CASE( test_trnsys_fmu )
 	fmiComponent trnsysSlave;
 
 	// Try with invalid set of callback functions.
-	trnsysSlave = fmiInstantiateSlave( "Type6139_Test",
-					   "{TRNSYS17-TYPE-6139-TEST-000000000000}",
+	trnsysSlave = fmiInstantiateSlave( "Type6139_FMI1_Test",
+					   "{TRNSYS17-TYPE-6139-TEST-FMI100000000}",
 					   FMU_URI,
 					   "application/x-trnexe", 0, fmiTrue,
 					   fmiFalse, invalidFunctions, loggingOn );
 	BOOST_REQUIRE_MESSAGE( 0 == trnsysSlave, "fmiInstantiateSlave(...) should have failed." );
 
-	trnsysSlave = fmiInstantiateSlave( "Type6139_Test",
-					   "{TRNSYS17-TYPE-6139-TEST-000000000000}",
+	trnsysSlave = fmiInstantiateSlave( "Type6139_FMI1_Test",
+					   "{TRNSYS17-TYPE-6139-TEST-FMI100000000}",
 					   FMU_URI,
 					   "application/x-trnexe", 0, fmiTrue,
 					   fmiFalse, functions, loggingOn );

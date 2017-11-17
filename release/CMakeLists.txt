@@ -55,10 +55,10 @@ else ()
    if ( MSVC )
       # disable auto-linking and use cmake's dependency handling
       add_definitions( -DBOOST_ALL_NO_LIB /W3 )
-	  
+
       # Define target output directory.
       foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
-	     string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
+         string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
          set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${PROJECT_SOURCE_DIR}/../binaries )
          set( CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${PROJECT_SOURCE_DIR}/../binaries )
          set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${PROJECT_SOURCE_DIR}/../binaries )
@@ -84,7 +84,7 @@ if ( MSVC )
    set( Boost_USE_STATIC_RUNTIME OFF )
 endif ()
 
-find_package( Boost COMPONENTS date_time system filesystem REQUIRED )
+find_package( Boost COMPONENTS date_time system filesystem system REQUIRED )
 
 if ( Boost_FOUND )
    include_directories( ${Boost_INCLUDE_DIRS} )
@@ -94,35 +94,63 @@ endif ()
 
 # FMI back end component (TRNSYS type Type6139).
 add_library( Type6139Lib SHARED
-             ${PROJECT_SOURCE_DIR}/../sources/type6139/Type6139.cpp
-             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/FMIComponentBackEnd.cpp
-             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/IPCLogger.cpp
-             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/IPCSlaveLogger.cpp
-             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/SHMSlave.cpp
-             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/SHMManager.cpp
-             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/HelperFunctions.cpp
-             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/ScalarVariable.cpp )
+   ${PROJECT_SOURCE_DIR}/../sources/type6139/Type6139.cpp
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/FMIComponentBackEnd.cpp
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/IPCLogger.cpp
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/IPCSlaveLogger.cpp
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/SHMSlave.cpp
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/SHMManager.cpp
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/HelperFunctions.cpp
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/ScalarVariable.cpp )
 
-# FMI front end component library (for FMU DLL).
+# FMI 1.0: front end component library (pre-stage for compiling an FMU DLL according to FMI 1.0).
 add_library( libfmipp_fmu_frontend STATIC
-             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/FMIComponentFrontEndBase.cpp
-             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/FMIComponentFrontEnd.cpp
-             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/IPCLogger.cpp
-             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/IPCMasterLogger.cpp
-             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/SHMMaster.cpp
-             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/SHMManager.cpp
-             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/HelperFunctions.cpp
-             ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/ScalarVariable.cpp
-             ${PROJECT_SOURCE_DIR}/../sources/fmipp/import/base/src/ModelDescription.cpp
-             ${PROJECT_SOURCE_DIR}/../sources/fmipp/import/base/src/PathFromUrl.cpp )
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/FMIComponentFrontEndBase.cpp
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/FMIComponentFrontEnd.cpp
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/IPCLogger.cpp
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/IPCMasterLogger.cpp
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/SHMMaster.cpp
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/SHMManager.cpp
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/HelperFunctions.cpp
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/ScalarVariable.cpp
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/import/base/src/ModelDescription.cpp
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/import/base/src/PathFromUrl.cpp
+   )
 
+# FMI 2.0: complete FMU DLL.
+add_library( fmi2 SHARED
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/functions/fmi_v2.0/fmi2Functions.cpp
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/ScalarVariable.cpp
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/FMIComponentFrontEndBase.cpp
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/FMIComponentFrontEnd.cpp
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/IPCLogger.cpp
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/IPCMasterLogger.cpp
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/SHMMaster.cpp
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/SHMManager.cpp
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/src/HelperFunctions.cpp
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/import/base/src/ModelDescription.cpp
+   ${PROJECT_SOURCE_DIR}/../sources/fmipp/import/base/src/PathFromUrl.cpp
+   )
+
+# Define compiler flags.
+target_compile_definitions( fmi2 PRIVATE
+   FRONT_END_TYPE=FMIComponentFrontEnd
+   FRONT_END_TYPE_INCLUDE="export/include/FMIComponentFrontEnd.h"
+   )
 
 # Include directories.
 include_directories( ${PROJECT_SOURCE_DIR}/../sources/type6139 )
 include_directories( ${PROJECT_SOURCE_DIR}/../sources/fmipp )
+include_directories( ${PROJECT_SOURCE_DIR}/../sources/fmipp/export/functions/fmi_v2.0 )
 
 # Link libraries.
 target_link_libraries( Type6139Lib
-                       Shlwapi
-					   ${Boost_LIBRARIES}
-                       ${User_TRNSYS17_PATH}/Exe/TRNDll.lib )
+   Shlwapi
+   ${Boost_LIBRARIES}
+   ${User_TRNSYS17_PATH}/Exe/TRNDll.lib
+   )
+
+target_link_libraries( fmi2
+   Shlwapi
+   ${Boost_LIBRARIES}
+   )

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fmiModelDescription
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	fmiVersion="2.0"
+	modelName="Type6139_FMI2_Test"
+	guid="{TRNSYS17-TYPE-6139-TEST-FMI200000000}"
+	generationTool="FMI++ TRNSYS Export Utility"
+	author="Edmund Widl"
+    description="FMI CS export test"
+	generationDateAndTime="2017-11-17T15:15:00+01:00"
+	variableNamingConvention="flat"
+	numberOfEventIndicators="0">
+	<CoSimulation
+		modelIdentifier="Type6139_FMI2_Test"
+		needsExecutionTool="false"
+		canHandleVariableCommunicationStepSize="false"
+		canNotUseMemoryManagementFunctions="true"
+		canInterpolateInputs="false"
+		maxOutputDerivativeOrder="0"
+		canGetAndSetFMUstate="false"
+		providesDirectionalDerivative="false"/>
+	<VendorAnnotations>
+		<Tool name="FMI++Export">
+			<Executable
+				executableURI="file:///C:/trnsys17/exe/trnexe.exe"
+				entryPointURI="fmu://resources/Type6139_Test.dck"
+				preArguments=""
+				postArguments="/n"/>
+			<File file="fmu://resources/Type6139_Test.PTI"/>
+		</Tool>
+	</VendorAnnotations>
+	<ModelVariables>
+		<ScalarVariable
+			name="FMI_in"
+			valueReference="1"
+			description="Connector of Real input signal"
+			variability="continuous"
+			causality="input">
+			<Real start="1."/>
+		</ScalarVariable>
+		<ScalarVariable
+			name="FMI_out"
+			valueReference="2"
+			description="Connector of Real output signal"
+			variability="continuous"
+			causality="output"
+			initial="exact">
+			<Real start="0."/>
+		</ScalarVariable>
+	</ModelVariables>
+	<ModelStructure/>
+</fmiModelDescription>

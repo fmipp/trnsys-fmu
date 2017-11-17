@@ -1,5 +1,6 @@
 # ignore binaries
-binaries/libfmipp_fmu_frontend.lib
+binaries/libfmipp_fmu_frontend.*
+binaries/fmi2.*
 binaries/libboost_date_time-vc120-mt-1_58.lib
 binaries/libboost_filesystem-vc120-mt-1_58.lib
 binaries/libboost_system-vc120-mt-1_58.lib
@@ -7,6 +8,10 @@ binaries/Type6139Lib.*
 
 # ignore FMUs for testing
 *.fmu
+
+# ignore files generated during testing
+*.log
+*.lst
 
 # ignore pickle file from installation process
 trnsys_fmu_install.pkl

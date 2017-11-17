@@ -14,6 +14,7 @@ def _print( *arg ): print ' '.join( map( str, arg ) )
 
 
 def generateTrnsysFMU(
+                fmi_version,
                 fmi_model_identifier,
                 deck_file_name,
                 trnsys_install_dir,
@@ -34,23 +35,9 @@ def generateTrnsysFMU(
         optional_files -- definition of additional files (list of strings)
         trnsys_fmu_root_dir -- path root dir of TRNSYS FMU Export Utility (string)
         """
-        
-        # Template string for XML model description header.
-        model_description_header = '<?xml version="1.0" encoding="UTF-8"?>\n<fmiModelDescription fmiVersion="1.0" modelName="__MODEL_NAME__" modelIdentifier="__MODEL_IDENTIFIER__" description="TRNSYS FMI CS export" generationTool="FMI++ TRNSYS Export Utility" generationDateAndTime="__DATE_AND_TIME__" variableNamingConvention="flat" numberOfContinuousStates="0" numberOfEventIndicators="0" author="__USER__" guid="{__GUID__}">\n\t<VendorAnnotations>\n\t\t<Tool name="trnexe">\n\t\t\t<Executable preArguments="" postArguments="/n" executableURI="__TRNEXE_URI__"/>\n\t\t</Tool>\n\t</VendorAnnotations>\n\t<ModelVariables>\n'
 
-        # Template string for XML model description of scalar variables.
-        scalar_variable_node = '\t\t<ScalarVariable name="__VAR_NAME__" valueReference="__VAL_REF__" variability="continuous" causality="__CAUSALITY__">\n\t\t\t<Real__START_VALUE__/>\n\t\t</ScalarVariable>\n'
-
-        # Template string for XML model description footer.
-        model_description_footer = '\t</ModelVariables>\n\t<Implementation>\n\t\t<CoSimulation_Tool>\n\t\t\t<Capabilities canHandleVariableCommunicationStepSize="false" canHandleEvents="true" canRejectSteps="false" canInterpolateInputs="false" maxOutputDerivativeOrder="0" canRunAsynchronuously="false" canBeInstantiatedOnlyOncePerProcess="false" canNotUseMemoryManagementFunctions="true"/>\n\t\t\t<Model entryPoint="fmu://__DECK_FILE_NAME__" manualStart="false" type="application/x-trnexe">__ADDITIONAL_FILES__</Model>\n\t\t</CoSimulation_Tool>\n\t</Implementation>\n</fmiModelDescription>'
-
-        # Create new XML model description file.
-        model_description_name = 'modelDescription.xml'
-        model_description = open( model_description_name, 'w' )
-
-        #
-        # Replace template arguments in header.
-        #
+        # Retrieve templates for different parts of XML model description according to FMI version.
+        ( model_description_header, scalar_variable_node, model_description_footer ) = getModelDescriptionTemplates( fmi_version )
 
         # FMI model identifier.
         model_description_header = model_description_header.replace( '__MODEL_IDENTIFIER__', fmi_model_identifier )
@@ -72,18 +59,17 @@ def generateTrnsysFMU(
         trnsys_exe_uri = urlparse.urljoin( 'file:', urllib.pathname2url( trnsys_install_dir ) ) + '/exe/trnexe.exe'
         model_description_header = model_description_header.replace( '__TRNEXE_URI__', trnsys_exe_uri )
 
-        # Write header to file.
-        model_description.write( model_description_header );
+        # Define a string to collect all scalar variable definitions.
+        model_description_scalars = ''
 
-        #
-        # Add scalar variable description.
-        #
-        input_val_ref = 1 # Value references for inputs start with 1.
+        # Add scalar input variables description. Value references for inputs start with 1.
+        input_val_ref = 1
         for var in fmi_input_vars:
                 scalar_variable_description = scalar_variable_node
                 scalar_variable_description = scalar_variable_description.replace( '__VAR_NAME__', var )
                 scalar_variable_description = scalar_variable_description.replace( '__CAUSALITY__', "input" )
                 scalar_variable_description = scalar_variable_description.replace( '__VAL_REF__', str( input_val_ref ) )
+                scalar_variable_description = scalar_variable_description.replace( '__INITIAL__', '' )
                 if var in start_values:
                         start_value_description = ' start=\"' + start_values[var] + '\"'
                         scalar_variable_description = scalar_variable_description.replace( '__START_VALUE__', start_value_description )
@@ -92,9 +78,9 @@ def generateTrnsysFMU(
                         scalar_variable_description = scalar_variable_description.replace( '__START_VALUE__', '' )
                 input_val_ref += 1
                 # Write scalar variable description to file.
-                model_description.write( scalar_variable_description );
+                model_description_scalars += scalar_variable_description;
 
-        # Value references for outputs start with 1001 (except there are already input value references with corresponding values).
+        # Add scalar input variables description. Value references for outputs start with 1001 (except there are already input value references with corresponding values).
         output_val_ref = 1001 if ( input_val_ref < 1001 ) else input_val_ref
         for var in fmi_output_vars:
                 scalar_variable_description = scalar_variable_node
@@ -104,62 +90,33 @@ def generateTrnsysFMU(
                 if var in start_values:
                         start_value_description = ' start=\"' + start_values[var] + '\"'
                         scalar_variable_description = scalar_variable_description.replace( '__START_VALUE__', start_value_description )
+                        scalar_variable_description = scalar_variable_description.replace( '__INITIAL__', 'initial="exact"' )
                         if ( True == verbose ): _print( '[DEBUG] Added start value to model description: ', var, '=', start_values[var] )
                 else:
                         scalar_variable_description = scalar_variable_description.replace( '__START_VALUE__', '' )
+                        scalar_variable_description = scalar_variable_description.replace( '__INITIAL__', '' )
                 output_val_ref += 1
                 # Write scalar variable description to file.
-                model_description.write( scalar_variable_description );
-
-        #
-        # Replace template arguments in footer.
-        #
+                model_description_scalars += scalar_variable_description;
 
         # Input deck file.
-        model_description_footer = model_description_footer.replace( '__DECK_FILE_NAME__', os.path.basename( deck_file_name ) )
+        ( model_description_header, model_description_footer ) = \
+            addDeckFileToModelDescription( model_description_header, model_description_footer, fmi_version )
 
-        # Additional input files.
-        if ( 0 == len( optional_files ) ):
-                model_description_footer = model_description_footer.replace( '__ADDITIONAL_FILES__', '' )
-        else:
-                additional_files_description = ''
-                for file_name in optional_files:
-                        additional_files_description += '\n\t\t\t\t<File file=\"fmu://' + os.path.basename( file_name ) + '\"/>'
-                        if ( True == verbose ): _print( '[DEBUG] Added additional file to model description: ', os.path.basename( file_name ) )
-                additional_files_description += '\n\t\t\t'
-                model_description_footer = model_description_footer.replace( '__ADDITIONAL_FILES__', additional_files_description )
+        # Optional files.
+        ( model_description_header, model_description_footer ) = \
+            addOptionalFilesToModelDescription( model_description_header, model_description_footer, optional_files, fmi_version )
 
-
-        # Write footer to file.
+        # Create new XML model description file.
+        model_description_name = 'modelDescription.xml'
+        model_description = open( model_description_name, 'w' )
+        model_description.write( model_description_header );
+        model_description.write( model_description_scalars );
         model_description.write( model_description_footer );
-
-        # Close file.
         model_description.close()
 
-        # Check if model description is XML compliant.
-        #import xml.etree.ElementTree as ET
-        #tree = ET.parse( 'model_description.xml' )
-
-        # FMU shared library name.
-        fmu_shared_library_name = fmi_model_identifier + '.dll'
-
-        # Check if batch file for build process exists.
-        build_process_batch_file = trnsys_fmu_root_dir + '\\build.bat'
-        if ( False == os.path.isfile( build_process_batch_file ) ):
-                _print( '\n[ERROR] Could not find file: ', build_process_batch_file )
-                raise Exception( 8 )
-
-        # Compile FMU shared library.
-        for file_name in glob.glob( fmi_model_identifier + '.*' ):
-                if not ( ( ".dck" in file_name ) or ( ".tpf" in file_name ) ): os.remove( file_name ) # Do not accidentaly remove the deck file!
-        if ( True == os.path.isfile( 'fmiFunctions.obj' ) ): os.remove( 'fmiFunctions.obj' )
-        build_process = subprocess.Popen( [build_process_batch_file, fmi_model_identifier] )
-        stdout, stderr = build_process.communicate()
-
-        # Check if batch script has executed successfully.
-        if ( False == os.path.isfile( fmu_shared_library_name ) ):
-		_print( '\n[ERROR] Not able to create shared library: ', fmu_shared_library_name )
-		raise Exception( 16 )
+        # Create FMU shared library.
+        fmu_shared_library_name = createSharedLibrary( fmi_model_identifier, fmi_version )
 
         # Check if working directory for FMU creation already exists.
         if ( True == os.path.isdir( fmi_model_identifier ) ):
@@ -171,11 +128,17 @@ def generateTrnsysFMU(
         # Create working directory (incl. sub-directories) for FMU creation.
         os.makedirs( binaries_dir )
 
+        # Resources directory path.
+        resources_dir = os.path.join( fmi_model_identifier, 'resources' )
+
+        # Create resources directory for FMU creation.
+        os.makedirs( resources_dir )
+
         # Copy all files to working directory.
         shutil.copy( model_description_name, fmi_model_identifier ) # XML model description.
-        shutil.copy( deck_file_name, fmi_model_identifier ) # TRNSYS deck file.
+        shutil.copy( deck_file_name, resources_dir ) # TRNSYS deck file.
         for file_name in optional_files: # Additional files.
-                shutil.copy( file_name, fmi_model_identifier )
+                shutil.copy( file_name, resources_dir )
         shutil.copy( fmu_shared_library_name, binaries_dir ) # FMU DLL.
 
 
@@ -185,18 +148,114 @@ def generateTrnsysFMU(
         shutil.make_archive( fmi_model_identifier, 'zip', fmi_model_identifier )
 
         # Finally, create the FMU!!!
-        if ( True == os.path.isfile( fmi_model_identifier + '.fmu' ) ):
-                os.remove( fmi_model_identifier + '.fmu' )
-        os.rename( fmi_model_identifier + '.zip', fmi_model_identifier + '.fmu' )
+        fmu_file_name = fmi_model_identifier + '.fmu'
+        if ( True == os.path.isfile( fmu_file_name ) ):
+                os.remove( fmu_file_name )
+        os.rename( fmi_model_identifier + '.zip', fmu_file_name )
 
         # Clean up.
         if ( False == litter ):
-                os.remove( model_description_name )
-                os.remove( 'build.log' )
-                os.remove( 'fmiFunctions.obj' )
+                for fn in [ model_description_name, 'build.log', 'fmiFunctions.obj' ]:
+                        os.remove( fn ) if os.path.isfile( fn ) else None
                 shutil.rmtree( fmi_model_identifier, False )
                 for file_name in glob.glob( fmi_model_identifier + '.*' ):
                         if not ( ( ".fmu" in file_name ) or ( ".dck" in file_name ) or ( ".tpf" in file_name ) ): os.remove( file_name )
+
+        # Return name of created FMU.
+        return fmu_file_name
+
+
+# Get templates for the XML model description depending on the FMI version.
+def getModelDescriptionTemplates( fmi_version ):
+        if ( '1' == fmi_version ): # FMI 1.0
+                # Template string for XML model description header.
+                header_v1 = '<?xml version="1.0" encoding="UTF-8"?>\n<fmiModelDescription fmiVersion="1.0" modelName="__MODEL_NAME__" modelIdentifier="__MODEL_IDENTIFIER__" description="TRNSYS FMI CS export" generationTool="FMI++ TRNSYS Export Utility" generationDateAndTime="__DATE_AND_TIME__" variableNamingConvention="flat" numberOfContinuousStates="0" numberOfEventIndicators="0" author="__USER__" guid="{__GUID__}">\n\t<VendorAnnotations>\n\t\t<Tool name="trnexe">\n\t\t\t<Executable preArguments="" postArguments="/n" executableURI="__TRNEXE_URI__"/>\n\t\t</Tool>\n\t</VendorAnnotations>\n\t<ModelVariables>\n'
+
+                # Template string for XML model description of scalar variables.
+                scalar_variable_node_v1 = '\t\t<ScalarVariable name="__VAR_NAME__" valueReference="__VAL_REF__" variability="continuous" causality="__CAUSALITY__">\n\t\t\t<Real__START_VALUE__/>\n\t\t</ScalarVariable>\n'
+
+                # Template string for XML model description footer.
+                footer_v1 = '\t</ModelVariables>\n\t<Implementation>\n\t\t<CoSimulation_Tool>\n\t\t\t<Capabilities canHandleVariableCommunicationStepSize="false" canHandleEvents="true" canRejectSteps="false" canInterpolateInputs="false" maxOutputDerivativeOrder="0" canRunAsynchronuously="false" canBeInstantiatedOnlyOncePerProcess="false" canNotUseMemoryManagementFunctions="true"/>\n\t\t\t<Model entryPoint="fmu://resources/__DECK_FILE_NAME__" manualStart="false" type="application/x-trnexe">__ADDITIONAL_FILES__</Model>\n\t\t</CoSimulation_Tool>\n\t</Implementation>\n</fmiModelDescription>'
+
+                return ( header_v1, scalar_variable_node_v1, footer_v1 )
+
+        elif ( '2' == fmi_version ): # FMI 2.0
+                # Template string for XML model description header.
+                header_v2 = '<?xml version="1.0" encoding="UTF-8"?>\n<fmiModelDescription\n\txmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"\n\tfmiVersion="2.0"\n\tmodelName="__MODEL_NAME__"\n\tguid="{__GUID__}"\n\tgenerationTool="FMI++ TRNSYS Export Utility"\n\tauthor="__USER__"\n\tgenerationDateAndTime="__DATE_AND_TIME__"\n\tvariableNamingConvention="flat"\n\tnumberOfEventIndicators="0">\n\t<CoSimulation\n\t\tmodelIdentifier="__MODEL_IDENTIFIER__"\n\t\tneedsExecutionTool="false"\n\t\tcanHandleVariableCommunicationStepSize="false"\n\t\tcanNotUseMemoryManagementFunctions="true"\n\t\tcanInterpolateInputs="false"\n\t\tmaxOutputDerivativeOrder="0"\n\t\tcanGetAndSetFMUstate="false"\n\t\tprovidesDirectionalDerivative="false"/>\n\t<VendorAnnotations>\n\t\t<Tool name="FMI++Export">\n\t\t\t<Executable\n\t\t\t\texecutableURI="__TRNEXE_URI__"\n\t\t\t\tentryPointURI="fmu://resources/__DECK_FILE_NAME__"\n\t\t\t\tpreArguments=""\n\t\t\t\tpostArguments="/n"/>__ADDITIONAL_FILES__</Tool>\n\t</VendorAnnotations>\n\t<ModelVariables>\n'
+
+                # Template string for XML model description of scalar variables.
+                scalar_variable_node_v2 = '\t\t<ScalarVariable name="__VAR_NAME__" valueReference="__VAL_REF__" variability="continuous" causality="__CAUSALITY__" __INITIAL__>\n\t\t\t<Real__START_VALUE__/>\n\t\t</ScalarVariable>\n'
+
+                # Template string for XML model description footer.
+                footer_v2 = '\t</ModelVariables>\n\t<ModelStructure/>\n</fmiModelDescription>'
+
+                return ( header_v2, scalar_variable_node_v2, footer_v2 )
+
+
+# Add deck file as entry point to XML model description.
+def addDeckFileToModelDescription( header, footer, fmi_version ):
+        if ( '1' == fmi_version ): # FMI 1.0
+                footer = footer.replace( '__DECK_FILE_NAME__', os.path.basename( deck_file_name ) )
+        elif ( '2' == fmi_version ): # FMI 2.0
+                header = header.replace( '__DECK_FILE_NAME__', os.path.basename( deck_file_name ) )
+
+        return ( header, footer )
+
+
+# Add optional files to XML model description.
+def addOptionalFilesToModelDescription( header, footer, optional_files, fmi_version ):
+        if ( 0 == len( optional_files ) ):
+                footer = footer.replace( '__ADDITIONAL_FILES__', '' )
+                header = header.replace( '__ADDITIONAL_FILES__', '' )
+        else:
+                additional_files_description = ''
+                indent = ''
+
+                if ( '1' == fmi_version ): indent = '\n\t\t\t'
+                if ( '2' == fmi_version ): indent = '\n\t\t'
+
+                for file_name in optional_files:
+                        additional_files_description += indent + '\t<File file=\"fmu://resources/' + os.path.basename( file_name ) + '\"/>'
+                        if ( True == verbose ): _print( '[DEBUG] Added additional file to model description: ', os.path.basename( file_name ) )
+                additional_files_description += indent
+
+                if ( '1' == fmi_version ): footer = footer.replace( '__ADDITIONAL_FILES__', additional_files_description )
+                if ( '2' == fmi_version ): header = header.replace( '__ADDITIONAL_FILES__', additional_files_description )
+
+        return ( header, footer )
+
+
+# Create DLL for FMU.
+def createSharedLibrary( fmi_model_identifier, fmi_version ):
+        # Define name of shared library.
+        fmu_shared_library_name = fmi_model_identifier + '.dll'
+
+        if ( '1' == fmi_version ):
+                # Check if batch file for build process exists.
+                build_process_batch_file = trnsys_fmu_root_dir + '\\build.bat'
+                if ( False == os.path.isfile( build_process_batch_file ) ):
+                        _print( '\n[ERROR] Could not find file: ', build_process_batch_file )
+                        raise Exception( 8 )
+                        # Compile FMU shared library.
+                for file_name in glob.glob( fmi_model_identifier + '.*' ):
+                        if not ( ( ".dck" in file_name ) or ( ".tpf" in file_name ) ): os.remove( file_name ) # Do not accidentaly remove the deck file!
+                if ( True == os.path.isfile( 'fmiFunctions.obj' ) ): os.remove( 'fmiFunctions.obj' )
+                build_process = subprocess.Popen( [build_process_batch_file, fmi_model_identifier] )
+                stdout, stderr = build_process.communicate()
+
+        # Check if batch script has executed successfully.
+        if ( '2' == fmi_version ):
+                fmi2_dll_path = os.path.join( trnsys_fmu_root_dir, 'binaries', 'fmi2.dll' )
+                if ( False == os.path.isfile( fmi2_dll_path ) ):
+                        _print( '\n[ERROR] DLL not found: ', fmi2_dll_path )
+                        raise Exception( 16 )
+                shutil.copy( fmi2_dll_path, fmu_shared_library_name )
+
+        if ( False == os.path.isfile( fmu_shared_library_name ) ):
+                _print( '\n[ERROR] Not able to create shared library: ', fmu_shared_library_name )
+                raise Exception( 17 )
+
+        return fmu_shared_library_name
 
 
 # Helper function. Retrieve labels from file. The file is expected to
@@ -230,6 +289,7 @@ def usage():
         _print( '-m, --model-id=\t\tspecify FMU model identifier' )
         _print( '-d, --deck-file=\tpath to TRNSYS deck file' )
         _print( '\nOPTIONAL ARGUMENTS:' )
+        _print( '-f, --fmi-version=\tspecify FMI version (allowed values: 1 or 2, default: 2)' )
         _print( '-h, --help\t\tdisplay this information' )
         _print( '-v, --verbose\t\tturn on log messages' )
         _print( '-l, --litter\t\tdo not clean-up intermediate files' )
@@ -240,6 +300,9 @@ def usage():
 
 # Main function
 if __name__ == "__main__":
+
+        # FMI version
+        fmi_version = None
 
         # FMI model identifier.
         fmi_model_identifier = None
@@ -267,8 +330,8 @@ if __name__ == "__main__":
 
         # Parse command line arguments.
         try:
-                options_definition_short = "vhlm:d:t:"
-                options_definition_long = [ "verbose", "help", "litter", "model-id=", 'deck-file=', 'trnsys-install-dir=' ]
+                options_definition_short = "hvlm:d:t:f:"
+                options_definition_long = [ "help", "verbose", "litter", "model-id=", 'deck-file=', 'trnsys-install-dir=', 'fmi-version=' ]
                 options, extra = getopt.getopt( sys.argv[1:], options_definition_short, options_definition_long )
         except getopt.GetoptError as err:
                 _print( str( err ) )
@@ -280,16 +343,22 @@ if __name__ == "__main__":
                 if opt in ( '-h', '--help' ):
                         usage()
                         sys.exit()
+                elif opt in ( '-v', '--verbose' ):
+                        verbose = True
+                elif opt in ( '-l', '--litter' ):
+                        litter = True
                 elif opt in ( '-m', '--model-id' ):
                         fmi_model_identifier = arg
                 elif opt in ( '-d', '--deck-file' ):
                         deck_file_name = arg
                 elif opt in ( '-t', '--trnsys-install-dir' ):
                         trnsys_install_dir = arg
-                elif opt in ( '-v', '--verbose' ):
-                        verbose = True
-                elif opt in ( '-l', '--litter' ):
-                        litter = True
+                elif opt in ( '-f', '--fmi-version' ):
+                        if ( ( arg != '1' ) and ( arg != '2' ) ):
+                                _print( '\n[ERROR] Invalid input for FMI version. Allowed inputs: 1 or 2.' )
+                                usage()
+                                sys.exit(2)
+                        fmi_version = arg
 
         # Check if FMI model identifier has been specified.
         if ( None == fmi_model_identifier ):
@@ -306,7 +375,15 @@ if __name__ == "__main__":
                 _print( '\n[ERROR] Invalid TRNSYS deck file: ', deck_file_name )
                 usage()
                 sys.exit(4)
-        
+
+        # Check if FMI version has been specified.
+        if ( None == fmi_version ):
+                fmi_version = '2'
+                if ( True == verbose ):
+                        _print( '[DEBUG] Using FMI version 2 (default)' )
+        elif ( True == verbose ):
+                _print( '[DEBUG] Using FMI version', fmi_version )
+
         # No TRNSYS install directory provided -> read from file (created by script 'trnsys_fmu_install.py').
         if ( None == trnsys_install_dir ):
                 pkl_file_name = trnsys_fmu_root_dir + '\\trnsys_fmu_install.pkl'
@@ -423,7 +500,8 @@ if __name__ == "__main__":
         if ( found_type_6139b == False ): _print( '\n[WARNING] No instance of Type6139b found.\n' )
 
         try:
-                generateTrnsysFMU(
+                fmu_name = generateTrnsysFMU(
+                        fmi_version,
                         fmi_model_identifier,
                         deck_file_name,
                         trnsys_install_dir,
@@ -432,7 +510,9 @@ if __name__ == "__main__":
                         start_values,
                         optional_files,
                         trnsys_fmu_root_dir )
+
+                if ( True == verbose ): _print( "[DEBUG] FMU created successfully:", fmu_name )
+
         except Exception as e:
+                _print( e )
                 sys.exit( e.args[0] )
-        
-        if ( True == verbose ): _print( "[DEBUG] FMU created successfully!" )
