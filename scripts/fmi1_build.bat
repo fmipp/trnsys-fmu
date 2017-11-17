@@ -9,7 +9,7 @@ REM Check number of input arguments.
 SET ARG_COUNT=0
 FOR %%I IN (%*) DO SET /A ARG_COUNT+=1
 IF %ARG_COUNT% NEQ 1 (
-  ECHO USAGE: build.bat ^<fmi-model-identifier^>
+  ECHO USAGE: fmi1_build.bat ^<fmi-model-identifier^>
   GOTO:EOF
 )
 
@@ -29,13 +29,13 @@ REM Setup command line tools from Visual Studio 2013.
 CALL "%VS120COMNTOOLS%vsvars32.bat" >> %LOG_FILE%
 
 REM Define FMI export functions implementation file.
-SET FMI_FUNCTIONS_IMPLEMENTATION="%~DP0\sources\fmipp\export\functions\fmi_v1.0\fmiFunctions.cpp"
+SET FMI_FUNCTIONS_IMPLEMENTATION="%~DP0\..\sources\fmipp\export\functions\fmi_v1.0\fmiFunctions.cpp"
 
 REM Define include flags for CL.
-SET INCLUDE_FLAGS=/I"%~DP0\sources\fmipp" /I"%~DP0\sources\fmipp\export\functions\fmi_v1.0"
+SET INCLUDE_FLAGS=/I"%~DP0\..\sources\fmipp" /I"%~DP0\..\sources\fmipp\export\functions\fmi_v1.0"
 
 REM Define library path for CL.
-SET LIBRARY_PATH="%~DP0\binaries"
+SET LIBRARY_PATH="%~DP0\..\binaries"
 
 REM Compile FMI front end component with correct model identifier.
 CL /c %INCLUDE_FLAGS% /nologo /W3 /WX- /O2 /Ob2 /Oy- /D WIN32 /D _WINDOWS /D NDEBUG /D MODEL_IDENTIFIER=%MODEL_IDENTFIER% /D FRONT_END_TYPE=FMIComponentFrontEnd /D "FRONT_END_TYPE_INCLUDE=\"export/include/FMIComponentFrontEnd.h\"" /D _WINDLL /D _MBCS /Gm- /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /GR /Gd /TP /analyze- /errorReport:queue %FMI_FUNCTIONS_IMPLEMENTATION% >> %LOG_FILE%
