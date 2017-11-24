@@ -62,7 +62,7 @@ def main( trnsys_fmu_root_dir = os.path.dirname( __file__ ), parser = None ):
 
     # No TRNSYS install directory provided -> read from file (created by script 'trnsys_fmu_install.py').
     if ( None == trnsys_install_dir ):
-        pkl_file_name = trnsys_fmu_root_dir + '\\trnsys_fmu_install.pkl'
+        pkl_file_name = modules.os.path.join( trnsys_fmu_root_dir, 'trnsys_fmu_install.pkl' )
         if ( True == modules.os.path.isfile( pkl_file_name ) ):
             pkl_file = open( pkl_file_name, 'rb' )
             trnsys_install_dir = modules.pickle.load( pkl_file )
