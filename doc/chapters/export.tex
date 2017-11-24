@@ -72,8 +72,8 @@ The input variables of \typeb can be connected to other \trnsys types in the usu
 
 \clearpage
 
-\section{Exporting an FMU}
-\label{sec:export:command}
+\section{Exporting an FMU using the graphical user interface}
+\label{sec:export:gui}
 
 Once a \trnsys model according to Section~\ref{sec:export:model} has been created, an FMU can be created with the following steps:
 \begin{enumerate}
@@ -81,31 +81,68 @@ Once a \trnsys model according to Section~\ref{sec:export:model} has been create
   Specify the values for \textit{Simulation start time}, \textit{Simulation stop time} and \textit{Simulation time step}.
   Regardless of the time units chosen here, the final FMU will always interpret time in seconds.
   \item \textbf{Create the deck file.} Either click the \textit{Write input file} icon in the side bar on the left or select from the menu bar on the top \textit{Calculate}~$\rightarrow$~\textit{Create input file}.
-  \item \textbf{Run the script}~\textbf{\texttt{trnsys\_fmu\_create.py}}. The FMU itself is created by executing a \python script from the command prompt window (please refer to the \href{https://docs.python.org/2/faq/windows.html}{\python~FAQ} in case you need assistance with this).
-  Open the command prompt window, change to the directory containing the deck file and execute the script \texttt{trnsys\_fmu\_create.py}:
-  \begin{verbatim}
-python <path_to_trnsys_fmu_dir>trnsys_fmu_create.py [-h] [-v] 
-     -m <model_id> -d <deck_file> [-t <trnsys_install_dir>]
-     [<additional_file_1> ... <additional_file_N>]
-     [var1=start_val1 ... varN=start_valN]
-  \end{verbatim}
-  The path to the installation directory \verb!<path_to_trnsys_fmu_dir>! may be relative or absolute.
-  Optional arguments are enclosed by squared brackets \verb![!$\,$\ldots\verb!]!, terms in angle brackets \verb!<!$\,$\ldots\verb!>! represent file paths.
-
-\textit{Mandatory input arguments}:
+  \item \textbf{Run}~\textbf{\texttt{trnsys\_fmu\_create.exe}}.
+  The FMU can be generated with the graphical user interface, see Figure~\ref{fig:trnsys_fmu_create_gui}
+  To run it, simply double-click \texttt{trnsys\_fmu\_create.exe} in the installation directory and provide the necessary inputs:
+  \textit{Mandatory input arguments}:
   \begin{itemize}
-    \item \verb!-m, --model-id!: Specify the FMU model identifier. \emph{Attention}: The FMU model identifier must fulfill the restrictions for C function names!
-    \item \verb!-d, --deck-file!: Path to \trnsys deck file (absolute or relative).
+    \item \textbf{FMI model identifier}: Specify the FMU model identifier. 
+    \emph{Attention}: The FMU model identifier must fulfill the restrictions for C function names!
+    \item \textbf{TRNSYS deck file} Path to \trnsys deck file (absolute or relative).
   \end{itemize}
   \textit{Optional input arguments}:
   \begin{itemize}
-    \item \verb!-h, --help!: Display the help screen.
-    \item \verb!-v, --verbose!: Turn on log messages.
-    \item \verb!-l, --litter!: Do not clean-up intermediate files (e.g., log file with debug messages from Visual Studio compiler).
-    \item \verb!-t, --trnsys-install-dir!: Absolute path to \trnsys installation directory. This should normally be set during the installation process (see Section~\ref{sec:install}).
-	\item Additional files may be specified (e.g., weather data or input/output name lists) that will be automatically copied to the FMU. The specified files paths may be absolute or relative.
-	\item Start values for variables may be defined. For instance, to set variable with name \verb!var1! to value 12.34, specify \verb!var1=12.34! in the command line as optional argument.
+    \item \textbf{Additional arguments}:
+    \begin{itemize}
+      \item Additional files may be specified (e.g., weather data or input/output name lists) that will be automatically copied to the FMU. The specified files paths may be absolute or relative.
+      \item Start values for variables may be defined. For instance, to set variable with name \verb!var1! to value 12.34, specify \verb!var1=12.34! in the command line as optional argument.
+    \end{itemize}
+    \item \textbf{FMI version}: Specify FMI version (default: 2).
+    \item \textbf{TRNSYS installation directory}: Absolute path to \trnsys installation directory. This should normally be set during the installation process (see Section~\ref{sec:install}).
+    \item \textbf{Verbosity}: Turn on log messages.
+    \item \textbf{Litter}: Do not clean-up intermediate files (e.g., log file with debug messages from Visual Studio compiler).
   \end{itemize}
 \end{enumerate}
 
+\begin{figure}[h]
+\centering{\includegraphics[width=0.98\textwidth]{trnsys_fmu_create_gui}}
+\caption{The graphical user interface for creating an FMU.}
+\label{fig:trnsys_fmu_create_gui}
+\end{figure}
 
+\clearpage
+
+\section{Exporting an FMU using Python scripts}
+\label{sec:export:command}
+
+Instead of using the graphical user interface described in Chapter~\ref{sec:export:gui}, FMUs can also be generated using the \python script~\texttt{trnsys\_fmu\_create.py}, located in the installation directory.
+The FMU is created by executing the script from the command prompt window (please refer to the \href{https://docs.python.org/2/faq/windows.html}{\python~FAQ} in case you need assistance with this).
+Open the command prompt window, change to the directory containing the deck file and execute the script:
+\begin{verbatim}
+python <path_to_trnsys_fmu_dir>trnsys_fmu_create.py [-h] [-v] 
+     -m <model_id> -d <deck_file> [-t <trnsys_install_dir>]
+     [-f <fmi_version>] [<additional_file_1> ... <additional_file_N>]
+     [var1=start_val1 ... varN=start_valN]
+  \end{verbatim}
+The path to the installation directory \verb!<path_to_trnsys_fmu_dir>! may be relative or absolute.
+Optional arguments are enclosed by squared brackets \verb![!$\,$\ldots\verb!]!.
+
+\textit{Mandatory input arguments}:
+\begin{itemize}
+
+  \item \verb!-m, --model-id!: Specify the FMU model identifier. \emph{Attention}: The FMU model identifier must fulfill the restrictions for C function names!
+  \item \verb!-d, --deck-file!: Path to \trnsys deck file (absolute or relative).
+
+\end{itemize}
+\textit{Optional input arguments}:
+\begin{itemize}
+
+  \item \verb!-h, --help!: Display the help screen.
+  \item \verb!-v, --verbose!: Turn on log messages.
+  \item \verb!-l, --litter!: Do not clean-up intermediate files (e.g., log file with debug messages from Visual Studio compiler).
+  \item \verb!-t, --trnsys-install-dir!: Absolute path to \trnsys installation directory. This should normally be set during the installation process (see Section~\ref{sec:install}).
+  \item \verb!-f, --fmi-version!: Specify FMI version (\verb!1! or \verb!2!, default is \verb!2!)
+  \item Additional files may be specified (e.g., weather data or input/output name lists) that will be automatically copied to the FMU. The specified files paths may be absolute or relative.
+  \item Start values for variables may be defined. For instance, to set variable with name \verb!var1! to value 12.34, specify \verb!var1=12.34! in the command line as optional argument.
+
+\end{itemize}
