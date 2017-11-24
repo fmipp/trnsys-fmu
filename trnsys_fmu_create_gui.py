@@ -29,7 +29,7 @@ def parseCommandLineArgumentsGooey():
 
     # Define optional arguments.
     parser.add_argument( 'extra_arguments', nargs = '*', default = None, help = 'start values and/or extra files (absolute paths or paths relative to current working directory)', metavar = 'Additional arguments' )
-    parser.add_argument( '-f', '--fmi_version', choices = [ '1', '2' ], default = '2', help = 'specify FMI version' )
+    parser.add_argument( '-f', '--fmi_version', choices = [ '1', '2' ], default = '2', help = 'specify FMI version', metavar = 'FMI Version' )
     parser.add_argument( '-v', '--verbose', action = 'store_true', default = True, help = 'turn on log messages', metavar = 'Verbosity' )
     parser.add_argument( '-l', '--litter', action = 'store_true', help = 'do not clean-up intermediate files', metavar = 'Litter' )
     parser.add_argument( '-t', '--trnsys_install_dir', default = None, help = 'path to TRNSYS installation directory (e.g., C:\\Trnsys17)', metavar = 'TRNSYS installation directory', widget = 'DirChooser' )
