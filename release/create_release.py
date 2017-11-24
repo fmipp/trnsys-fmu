@@ -29,19 +29,19 @@ def checkFilesExist( doc_file, required_binaries, cwd ):
     for file in files_for_release:
         full_file_name = cwd + '\\..\\' + file
         if ( False == os.path.isfile( full_file_name ) ):
-            print file, 'not found'
+            print( file, 'not found' )
             return False
     
     # Check if additional binaries are available.
     for file in required_binaries:
         full_file_name = cwd + '\\..\\' + file
         if ( False == os.path.isfile( full_file_name ) ):
-            print file, 'not found'
+            print( file, 'not found' )
             return False
 
     # Check if documentation is available.
     if ( False == os.path.isfile( cwd + '\\..\\' + doc_file ) ):
-        print doc_file, 'not found'
+        print( doc_file, 'not found' )
         return False
     
     return True
@@ -61,14 +61,14 @@ def createRelease( release_file, release_name, cwd ):
 if __name__ == "__main__":
 
     if len( sys.argv ) != 2:
-        print 'Usage:\n\tpython create-release.py <release-name>\n'
-        print 'Attention: Be sure to execute this script from subfolder \'release\'\n'
+        print( 'Usage:\n\tpython create-release.py <release-name>\n' )
+        print( 'Attention: Be sure to execute this script from subfolder \'release\'\n' )
         sys.exit()
     
     # Get current working directory (should be subfolder 'release').
     cwd = os.getcwd()
     if ( 'release' != os.path.basename( cwd ) ):
-        print 'Attention: Be sure to execute this script from subfolder \'release\'\n'
+        print( 'Attention: Be sure to execute this script from subfolder \'release\'\n' )
         sys.exit()
     
     # Check if files exist.

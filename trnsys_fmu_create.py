@@ -16,20 +16,18 @@
 
 ### Python 3
 import sys, os, shutil, time, getpass, uuid, getopt, pickle, subprocess, glob, argparse, urllib.parse as urlparse, urllib.request as urllib, collections
-def log( *arg ): print( ' '.join( map( str, arg ) ) )
+def log( *arg ): print( ' '.join( map( str, arg ) ), flush = True )
 
 from scripts.utils import *
 from scripts.generate_fmu import *
 
-
-# Main function
-if __name__ == "__main__":
+def main( trnsys_fmu_root_dir = os.path.dirname( __file__ ), parser = None ):
 
     Modules = collections.namedtuple( 'Modules', [ 'sys', 'os', 'shutil', 'time', 'getpass', 'uuid', 'urlparse', 'urllib', 'getopt', 'pickle', 'subprocess', 'glob', 'argparse', 'log' ] )
     modules = Modules( sys, os, shutil, time, getpass, uuid, urlparse, urllib, getopt, pickle, subprocess, glob, argparse, log )
 
     # Retrieve parsed command line arguments.
-    cmd_line_args = parseCommandLineArguments( modules )
+    cmd_line_args = parseCommandLineArguments( modules ) if ( parser == None ) else parser()
 
     # FMI model identifier.
     fmi_model_identifier = cmd_line_args.model_id
@@ -49,9 +47,6 @@ if __name__ == "__main__":
     # FMI version
     fmi_version = cmd_line_args.fmi_version
     if ( True == verbose ): modules.log( '[DEBUG] Using FMI version', fmi_version )
-
-    # Relative or absolute path to TRNSYS FMU Export Utility.
-    trnsys_fmu_root_dir = os.path.dirname( sys.argv[0] ) if len( os.path.dirname( sys.argv[0] ) ) else '.'
 
     # Check if specified TRNSYS deck file exists.
     if ( False == os.path.isfile( deck_file_name ) ):
@@ -73,7 +68,7 @@ if __name__ == "__main__":
             trnsys_install_dir = modules.pickle.load( pkl_file )
             pkl_file.close()
         else:
-            modules.log( '\n[ERROR] Please re-run script \'trnsys_fmu_install.py\' or provide TRNSYS install directory via command line option -t (--trnsys-install-dir)!' )
+            modules.log( '\n[ERROR] Please run \'trnsys_fmu_install.exe\' or provide the TRNSYS installation directory as optional argument!' )
             modules.sys.exit(5)
 
     # Check if specified TRNSYS install directory exists.
@@ -111,3 +106,7 @@ if __name__ == "__main__":
     except Exception as e:
         modules.log( e )
         modules.sys.exit( e.args[0] )
+
+# Main function
+if __name__ == "__main__":
+    main()

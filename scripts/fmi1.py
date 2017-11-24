@@ -52,7 +52,7 @@ def fmi1CreateSharedLibrary( fmi_model_identifier, trnsys_fmu_root_dir, verbose,
     fmu_shared_library_name = fmi_model_identifier + '.dll'
 
     # Check if batch file for build process exists.
-    build_process_batch_file = trnsys_fmu_root_dir + '\\scripts\\fmi1_build.bat'
+    build_process_batch_file = modules.os.path.join( trnsys_fmu_root_dir, 'scripts', 'fmi1_build.bat' )
     if ( False == modules.os.path.isfile( build_process_batch_file ) ):
         modules.log( '\n[ERROR] Could not find file: ', build_process_batch_file )
         raise Exception( 8 )

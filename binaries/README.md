@@ -4,6 +4,7 @@ From FMI++ (generated with the help of the Cmake project file in folder 'release
 
 - libfmipp_fmu_frontend.lib
 - Type6139Lib.dll
+- fmi2.dll
 
 
 From BOOST 1.58.0 (e.g., from http://sourceforge.net/projects/boost/files/boost-binaries/):

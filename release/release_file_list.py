@@ -68,21 +68,28 @@ source_code = [
 
 # Additional list of files (including relative path) from the repository that are part of the release.
 additional_files = [
+    'trnsys_fmu_install.exe', # installation program
     'trnsys_fmu_install.py', # installation script
+    'trnsys_fmu_create.exe', # program for creating a TRNSYS FMU
     'trnsys_fmu_create.py', # script for creating a TRNSYS FMU
-    'build.bat', # batch script for FMU compilation
     'binaries\\README.md',
+    'examples\\extra_file.dat',
+    'examples\\plant_room_model.dck',
+    'examples\\plant_room_model.tpf',
+    'examples\\README.md',
+    'examples\\trnsys_closed_loop_control_example.mo',
     'license\\BOOST_SOFTWARE_LICENSE.txt',
     'license\\FMIPP_LICENSE.txt',
     'license\\TRNSYS_FMU_LICENSE.txt',
-    'proformas\\Type6139a.bmp',
-    'proformas\\Type6139a.tmf',
-    'proformas\\Type6139b.bmp',
-    'proformas\\Type6139b.tmf',
-    'test\\plant_room_model.dck',
-    'test\\plant_room_model.tpf',
-    'test\\README.md',
-    'test\\trnsys_closed_loop_control_example.mo',
+    'scripts\\fmi1.py',
+    'scripts\\fmi1_build.bat',
+    'scripts\\fmi2.py',
+    'scripts\\generate_fmu.py',
+    'scripts\\utils.py',
+    'sources\\proformas\\Type6139a.bmp',
+    'sources\\proformas\\Type6139a.tmf',
+    'sources\\proformas\\Type6139b.bmp',
+    'sources\\proformas\\Type6139b.tmf',
 ]
 
 # List of files (without binaries and docs) that are part of the release.
@@ -91,10 +98,11 @@ files_for_release = files_from_fmipp + source_code + additional_files
 
 # List of binaries that are not provided by the repository (see also README in 'binaries' subfolder).
 required_binaries = [
+    'binaries\\fmi2.dll', # pre-compiled shared library (for FMI 2.0 only)
     'binaries\\libboost_date_time-vc120-mt-1_58.lib', # static BOOST date-time library
     'binaries\\libboost_filesystem-vc120-mt-1_58.lib', # static BOOST Filesystem library
     'binaries\\libboost_system-vc120-mt-1_58.lib', # static BOOST System libarary
-    'binaries\\libfmipp_fmu_frontend.lib', # static library containing pre-compiled parts of the front end
+    'binaries\\libfmipp_fmu_frontend.lib', # static library containing pre-compiled parts of the front end (for FMI 1.0 only)
     'binaries\\Type6139Lib.dll', # implementation of Type6139
 ]
 

@@ -16,6 +16,9 @@ binaries/Type6139Lib.*
 # ignore pickle file from installation process
 trnsys_fmu_install.pkl
 
+# ignore executables.
+*.exe
+
 # ignore pyc files
 *.pyc
 

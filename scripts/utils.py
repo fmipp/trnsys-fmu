@@ -24,7 +24,8 @@ def parseCommandLineArguments( modules ):
     required_args.add_argument( '-d', '--deck-file', required = True, help = 'path to TRNSYS deck file', metavar = 'DECK-FILE' )
 
     # Parse remaining optional arguments (start values, additional files).
-    parser.add_argument( 'extra_arguments', nargs = modules.argparse.REMAINDER, help = modules.argparse.SUPPRESS )
+    #parser.add_argument( 'extra_arguments', nargs = modules.argparse.REMAINDER, help = 'extra files and/or start values', metavar = 'additional arguments' )
+    parser.add_argument( 'extra_arguments', nargs = '*', default = None, help = 'extra files and/or start values', metavar = 'additional arguments' )
 
     # Add help for additional files.
     parser.add_argument_group( 'additional files', 'Additional files (e.g., for weather data) may be specified as extra arguments. These files will be automatically copied to the resources directory of the FMU.' )
@@ -44,19 +45,20 @@ def parseAdditionalInputs( extra_arguments, verbose, modules ):
     start_values = {}
 
     # Retrieve additional files from command line arguments.
-    for item in extra_arguments:
-        if "=" in item:
-            start_value_pair = item.split( '=' )
-            varname = start_value_pair[0].strip(' "\n\t')
-            value = start_value_pair[1].strip(' "\n\t')
-            if ( True == verbose ): modules.log( '[DEBUG] Found start value: ', varname, '=', value )
-            start_values[varname] = value;
-        elif ( True == modules.os.path.isfile( item ) ): # Check if this is an additional input file.
-            optional_files.append( item )
-            if ( True == verbose ): modules.log( '[DEBUG] Found additional file: ', item )
-        else:
-            modules.log( '\n[ERROR] Invalid input argument: ', item )
-            modules.sys.exit(7)
+    if extra_arguments != None:
+        for item in extra_arguments:
+            if '=' in item:
+                start_value_pair = item.split( '=' )
+                varname = start_value_pair[0].strip(' "\n\t')
+                value = start_value_pair[1].strip(' "\n\t')
+                if ( True == verbose ): modules.log( '[DEBUG] Found start value: ', varname, '=', value )
+                start_values[varname] = value;
+            elif ( True == modules.os.path.isfile( item ) ): # Check if this is an additional input file.
+                optional_files.append( item )
+                if ( True == verbose ): modules.log( '[DEBUG] Found additional file: ', item )
+            else:
+                modules.log( '\n[ERROR] Invalid input argument: ', item )
+                modules.sys.exit(7)
 
     return ( optional_files, start_values )
 
