@@ -170,10 +170,10 @@ target_link_libraries( Type6139Lib
 add_custom_command( TARGET Type6139Lib POST_BUILD
    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:Type6139Lib> "${TRNSYS17_PATH}/UserLib/ReleaseDLLs"
    COMMAND ${CMAKE_COMMAND} -E make_directory "${TRNSYS17_PATH}/Studio/Proformas/My Components"
-   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../proformas/Type6139a.tmf "${TRNSYS17_PATH}/Studio/Proformas/My Components"
-   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../proformas/Type6139a.bmp "${TRNSYS17_PATH}/Studio/Proformas/My Components"
-   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../proformas/Type6139b.tmf "${TRNSYS17_PATH}/Studio/Proformas/My Components"
-   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../proformas/Type6139b.bmp "${TRNSYS17_PATH}/Studio/Proformas/My Components"
+   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../sources/proformas/Type6139a.tmf "${TRNSYS17_PATH}/Studio/Proformas/My Components"
+   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../sources/proformas/Type6139a.bmp "${TRNSYS17_PATH}/Studio/Proformas/My Components"
+   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../sources/proformas/Type6139b.tmf "${TRNSYS17_PATH}/Studio/Proformas/My Components"
+   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/../../sources/proformas/Type6139b.bmp "${TRNSYS17_PATH}/Studio/Proformas/My Components"
    )
 
 
