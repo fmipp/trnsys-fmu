@@ -83,7 +83,7 @@ Once a \trnsys model according to Section~\ref{sec:export:model} has been create
   \item \textbf{Create the deck file.} Either click the \textit{Write input file} icon in the side bar on the left or select from the menu bar on the top \textit{Calculate}~$\rightarrow$~\textit{Create input file}.
   \item \textbf{Run}~\textbf{\texttt{trnsys\_fmu\_create.exe}}.
   The FMU can be generated with the graphical user interface, see Figure~\ref{fig:trnsys_fmu_create_gui}
-  To run it, simply double-click \texttt{trnsys\_fmu\_create.exe} in the installation directory and provide the necessary inputs:
+  To run it, simply double-click \texttt{trnsys\_fmu\_create.exe} in the installation directory and provide the necessary inputs:\\
   \textit{Mandatory input arguments}:
   \begin{itemize}
     \item \textbf{FMI model identifier}: Specify the FMU model identifier. 
@@ -95,7 +95,7 @@ Once a \trnsys model according to Section~\ref{sec:export:model} has been create
     \item \textbf{Additional arguments}:
     \begin{itemize}
       \item Additional files may be specified (e.g., weather data or input/output name lists) that will be automatically copied to the FMU. The specified files paths may be absolute or relative.
-      \item Start values for variables may be defined. For instance, to set variable with name \verb!var1! to value 12.34, specify \verb!var1=12.34! in the command line as optional argument.
+      \item Start values for variables may be defined. For instance, to set variable with name \verb!var1! to value 12.34, specify \verb!var1=12.34! as optional argument.
     \end{itemize}
     \item \textbf{FMI version}: Specify FMI version (default: 2).
     \item \textbf{TRNSYS installation directory}: Absolute path to \trnsys installation directory. This should normally be set during the installation process (see Section~\ref{sec:install}).

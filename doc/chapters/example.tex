@@ -10,7 +10,7 @@ This chapter provides a simple example of how to
 \end{itemize}
 
 The example uses a simple thermal model that is exported as FMU.
-The final FMU will have one input variable -- called \verb!control_signal! -- and two output variables -- called \verb!room_temperature! and \verb!mean_temperature!.
+The final FMU will have one input variable -- called \verb!control_signal! -- and three output variables -- called \verb!room_temperature!, \verb!mean_temperature! and \verb!value\_from\_file!.
 The FMU will then be used as a plant model in a simple closed-loop control system implemented in \href{https://en.wikipedia.org/wiki/Dymola}{\dymola}.
 Everything needed to reproduce the steps below can be found in the subfolder \texttt{examples} of the installation directory.
 
@@ -27,16 +27,16 @@ This example uses a very simple thermal room model that only consists of two equ
 The model is provided in file \verb!plant_room_model.tpf!, found in subfolder \verb!examples! of the installation directory.
 In the following, the configuration of \typeb is explained step-by-step---the configuration for \typea is analogous.
 
-For this example, the final FMU should have three output variables, called \texttt{room\_temperature}, \texttt{mean\_temperature} and \texttt{file\_output}.
-Within the \trnsys model, these \emph{FMU output variables} shall be represented by three \emph{\typeb input variables} called \texttt{room\_temperature\_output}, \texttt{mean\_temperature\_output} and \texttt{value\_from\_file}.
+For this example, the final FMU should have three output variables, called \texttt{room\_temperature}, \texttt{mean\_temperature} and \texttt{value\_from\_file}.
+Within the \trnsys model, these \emph{FMU output variables} shall be represented by three \emph{\typeb input variables} called \texttt{room\_temperature\_output}, \texttt{mean\_temperature\_output} and \texttt{file\_output}.
 
 To configure \typeb, proceed as follows (compare to Section~\ref{sec:export:model}):
 \begin{itemize}
   \item Figure~\ref{fig:type_parameter_tab} shows the screen shot of the Proforma tab from Simulation Studio for \typeb.
-  In this example, the corresponding FMU is supposed to have 2 outputs.
+  In this example, the corresponding FMU is supposed to have 3 outputs.
   Hence, the value for \texttt{number of FMI outputs} is set to~3.
 
-  \item Consequently, the Input tab in Figure~\ref{fig:type_input_tab} shows two rows of type input variables.
+  \item Consequently, the Input tab in Figure~\ref{fig:type_input_tab} shows 3 rows of type input variables.
   In this example they have been renamed from their default values to \texttt{room\_temperature\_output}, \texttt{mean\_temperature\_output} and \texttt{file\_output}.
 
   \item In the Special Cards tab, the third row specifies the FMU output variable names as a comma separated list, compare Figure~\ref{fig:type_special_cards_tab}.
@@ -106,12 +106,25 @@ Then provide the following inputs (see Figure~\ref{fig:trnsys_fmu_create_example
 
   \item TRNSYS deck file: click \texttt{Browse} and select file \textit{plant\_room\_model.dck} from the examples folder
 
-  \item Additional arguments: \textit{examples\\extra\_file.dat room\_temperature=20.3 control\_signal=0}
+  \item Additional arguments: \textit{examples{\textbackslash}extra\_file.dat room\_temperature=20.3 control\_signal=0}. 
+  (Note the the path of the extra file relative to the installation directory.)
 
 \end{itemize}
 Then click the \texttt{Start} button to create the FMU.
-This should produce the outputs shown in Figure~\ref{fig:trnsys_fmu_create_example_result}.
 
+
+Some comments:
+\begin{itemize}
+
+  \item The model is exported with the FMI model identifier \verb!TRNSYS_Room_Plant!.
+  Hence, the FMU created will be named \verb!TRNSYS_Room_Plant.fmu!.
+
+  \item The command specifies several start values of FMI input/output variables in the additional arguments (\verb!control_signal=0! and \verb!room_temperature=20.3!), compare to the results in Section~\ref{sec:example:results}.
+  
+  \item The verbosity check box is by default selected, which  causes the script to output additional information.
+  In case the scripts executes successfully, this should produce the outputs shown in Figure~\ref{fig:trnsys_fmu_create_example_result}.
+
+\end{itemize}
 
 
 \subsection{Running the \python script}
@@ -119,8 +132,9 @@ This should produce the outputs shown in Figure~\ref{fig:trnsys_fmu_create_examp
 Instead of using the graphical user interface, the FMU can be generated with the help of the \python script explained in Section~\ref{sec:export:command}.
 For this example, the following command has to be issued in the command prompt window from the \texttt{examples} directory:
 \begin{verbatim}
-python.exe -v -m TRNSYS_Room_Plant -d ..\plant_room_model.dck 
-          extra_file.dat room_temperature=20.3 control_signal=0
+python.exe ..\trnsys_fmu_create.py -v -m TRNSYS_Room_Plant
+      -d plant_room_model.dck extra_file.dat
+      room_temperature=20.3 control_signal=0
 \end{verbatim}
 \textbf{Attention}:
 The full command is too long to be displayed in one line in this document, hence above it is split in two lines.
@@ -131,15 +145,12 @@ Some comments:
   \item The model is exported with the FMI model identifier \verb!TRNSYS_Room_Plant!, according to the value supplied to the mandatory input argument \verb!-m!.
   Hence, the FMU created will be named \verb!TRNSYS_Room_Plant.fmu!.
 
-  \item The \python script uses the model's deck file as input.
-  In this case, according to the value supplied to the mandatory input argument \verb!-d!, the deck file is stored under the name \verb!plant_room_model.dck! in subfolder \texttt{examples}.
+  \item The command specifies several start values of FMI input/output variables in the additional arguments (\verb!control_signal=0! and \verb!room_temperature=20.3!), compare to the results in Section~\ref{sec:example:results}.
   
-  \item The start value of FMI output variable \verb!room_temperature! is specified as 20.3, compare to the results in Section~\ref{sec:example:results}.
-  
-  \item The optional argument \verb!-d! causes the script to output additional information. In case the scripts executes successfully, the output should look similar to the following:
+  \item The optional argument \verb!-v! causes the script to output additional information. In case the scripts executes successfully, the output should look similar to the following:
 \begin{verbatim}
 [DEBUG] Using FMI version 2
-[DEBUG] Found additional file:  examples\extra_file.dat
+[DEBUG] Found additional file:  extra_file.dat
 [DEBUG] Found start value:  room_temperature = 20.3
 [DEBUG] Found start value:  control_signal = 0
 [DEBUG] FMI output parameters:
@@ -152,7 +163,7 @@ Some comments:
 [DEBUG] TRNSYS deck file:  examples\plant_room_model.dck
 [DEBUG] TRNSYS install directory:  D:\Trnsys17
 [DEBUG] Aditional files:
-         examples\extra_file.dat
+         extra_file.dat
 [DEBUG] Added start value to model description:  control_signal = 0
 [DEBUG] Added start value to model description:  room_temperature = 20.3
 [DEBUG] Added additional file to model description:  extra_file.dat
@@ -164,7 +175,7 @@ Some comments:
 
 \subsection{Checking the content}
 
-\textbf{Note}: In case of successful execution of the script, it is not necessary to check the content of the resulting FMU manually.
+\textbf{Note}: After successfully generating the FMU it is in general not necessary to check the content of the resulting FMU manually.
 This section only intends to give some background information and can be skipped when working through the example.
 
 Successfully running the script creates the FMU, i.e., a file called \verb!TRNSYS_Room_Plant.fmu!.
@@ -182,7 +193,7 @@ The contents of \verb!TRNSYS_Room_Plant.fmu! are as follows:
 
 The XML-based model description contains all relevant information about the model contained in the FMU:
 \begin{itemize}
-  \item the FMI model identifier and other model meta data, see XML node \texttt{fmiModelDescription}
+  \item the FMI model identifier and other model meta data, see attributes of XML node \texttt{fmiModelDescription}
 
   \item the input and output variables of the model, listed as separate \texttt{ScalarVariable} nodes
 
