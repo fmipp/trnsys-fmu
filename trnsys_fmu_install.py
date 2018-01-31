@@ -1,15 +1,13 @@
 # -----------------------------------------------------------------
-# Copyright (c) 2015, AIT Austrian Institute of Technology GmbH.
+# Copyright (c) 2017, AIT Austrian Institute of Technology GmbH.
 # All rights reserved. See file TRNSYS_FMU_LICENSE.txt for details.
 # -----------------------------------------------------------------
 
 import sys, os, shutil, pickle
 
-### Python 2
-# def log( *arg ): print ' '.join( map( str, arg ) )
-
-### Python 3
-def log( *arg ): print( ' '.join( map( str, arg ) ) )
+def log( *arg ):
+    print( ' '.join( map( str, arg ) ) )
+    sys.stdout.flush()
 
 
 def saveTrnsysInstallDir( trnsys_install_dir, trnsys_fmu_root_dir ):

@@ -6,23 +6,32 @@
 #
 # This file is used to create FMUs for CoSimulation from TRNSYS deck files.
 # 
-# By default, it should be used with Python 3. By uncommenting lines 14 & 15
-# and commenting lines 18 & 20, it can also be used with Python 2.
-#
 
-### Python 2
-# import sys, os, shutil, time, getpass, uuid, getopt, pickle, subprocess, glob, argparse, urlparse, urllib, collections
-# def log( *arg ): print ' '.join( map( str, arg ) )
+### Setup for Python 2.
+try:
+    import sys, os, shutil, time, getpass, uuid, getopt, pickle, subprocess, glob, argparse, urlparse, urllib, collections
+except:
+    pass
 
-### Python 3
-import sys, os, shutil, time, getpass, uuid, getopt, pickle, subprocess, glob, argparse, urllib.parse as urlparse, urllib.request as urllib, collections
-def log( *arg ): print( ' '.join( map( str, arg ) ), flush = True )
+### Setup for Python 3.
+try:
+    import sys, os, shutil, time, getpass, uuid, getopt, pickle, subprocess, glob, argparse, urllib.parse as urlparse, urllib.request as urllib, collections    
+except:
+    pass
+
+def log( *arg ):
+    print( ' '.join( map( str, arg ) ) )
+    sys.stdout.flush()
+
 
 from scripts.utils import *
 from scripts.generate_fmu import *
 
+
 def main( trnsys_fmu_root_dir = os.path.dirname( __file__ ), parser = None ):
 
+    # Create container for all used Python modules, which will be passed to all called functions.
+    # This makes it easier to run this script with different Python version (2.x and 3.x).
     Modules = collections.namedtuple( 'Modules', [ 'sys', 'os', 'shutil', 'time', 'getpass', 'uuid', 'urlparse', 'urllib', 'getopt', 'pickle', 'subprocess', 'glob', 'argparse', 'log' ] )
     modules = Modules( sys, os, shutil, time, getpass, uuid, urlparse, urllib, getopt, pickle, subprocess, glob, argparse, log )
 
