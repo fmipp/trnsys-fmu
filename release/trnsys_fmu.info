@@ -1,0 +1,13 @@
+[Tool]
+name=TRNSYS FMU Export Utility
+href=http://trnsys-fmu.sourceforge.net
+import_me=
+export_me=
+slave_cs=A
+master_cs=
+import_me_20=
+export_me_20=
+slave_cs_20=A
+master_cs_20=
+note=A stand-alone tool for exporting FMUs for Co-Simulation from TRNSYS models.
+email=ces@ait.ac.at
