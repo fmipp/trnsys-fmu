@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------
-# Copyright (c) 2017, AIT Austrian Institute of Technology GmbH.
+# Copyright (c) 2017-2018, AIT Austrian Institute of Technology GmbH.
 # All rights reserved. See file TRNSYS_FMU_LICENSE.txt for details.
 # -----------------------------------------------------------------
 

@@ -1,6 +1,6 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
-// All rights reserved. See file FMIPP_LICENSE for details.
+// Copyright (c) 2013-2018, AIT Austrian Institute of Technology GmbH.
+// All rights reserved. See file TRNSYS_FMU_LICENSE.txt for details.
 // -------------------------------------------------------------------
 
 /**

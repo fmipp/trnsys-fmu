@@ -1,10 +1,10 @@
 # -----------------------------------------------------------------
-# Copyright (c) 2017, AIT Austrian Institute of Technology GmbH.
+# Copyright (c) 2017-2018, AIT Austrian Institute of Technology GmbH.
 # All rights reserved. See file TRNSYS_FMU_LICENSE.txt for details.
 # -----------------------------------------------------------------
 
 #
-# Collection of helper functions for creating FMU CS according to FMI 2.0 for TRNSYS.
+# Collection of helper functions for creating FMU CS for TRNSYS.
 #
 
 # Parse command line arguments.
@@ -31,7 +31,7 @@ def parseCommandLineArguments( modules ):
     parser.add_argument_group( 'additional files', 'Additional files (e.g., for weather data) may be specified as extra arguments. These files will be automatically copied to the resources directory of the FMU.' )
 
     # Add help for start values.
-    parser.add_argument_group( 'start values', 'Additional files (e.g., for weather data) may be specified as extra arguments. These files will be automatically copied to the resources directory of the FMU.' )
+    parser.add_argument_group( 'start values', 'Specify start values for FMU input variables and parameters.' )
 
     return parser.parse_args()
 

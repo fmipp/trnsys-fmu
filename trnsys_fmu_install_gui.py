@@ -1,3 +1,8 @@
+# -----------------------------------------------------------------
+# Copyright (c) 2017-2018, AIT Austrian Institute of Technology GmbH.
+# All rights reserved. See file TRNSYS_FMU_LICENSE.txt for details.
+# -----------------------------------------------------------------
+
 from gooey import Gooey, GooeyParser
 import os, sys, argparse
 

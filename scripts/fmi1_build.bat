@@ -1,7 +1,7 @@
 @ECHO OFF
 
 REM -----------------------------------------------------------------
-REM Copyright (c) 2015, AIT Austrian Institute of Technology GmbH.
+REM Copyright (c) 2015-2018, AIT Austrian Institute of Technology GmbH.
 REM All rights reserved. See file TRNSYS_FMU_LICENSE.txt for details.
 REM -----------------------------------------------------------------
 
